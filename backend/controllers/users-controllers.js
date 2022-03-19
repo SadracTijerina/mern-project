@@ -36,7 +36,7 @@ const signup = async (req, res, next) => {
     );
   }
 
-  const { name, email, password, places } = req.body;
+  const { name, email, password } = req.body;
 
   let existingUser;
 
@@ -64,7 +64,7 @@ const signup = async (req, res, next) => {
     password,
     image:
       "https://e0.365dm.com/21/07/1600x900/skysports-saul-canelo-alvarez_5439932.jpg?20210707125908",
-    places,
+    places: [],
   });
 
   try {
