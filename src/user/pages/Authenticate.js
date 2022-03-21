@@ -10,12 +10,16 @@ import {
   VALIDATOR_REQUIRE,
 } from "../../shared/util/validators";
 import { AuthContext } from "../../shared/context/auth-context";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
 
 import "./Authenticate.css";
 
 const Authenticate = () => {
   const auth = useContext(AuthContext);
   const [isLoginMode, setIsLoginMode] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
 
   const [formState, inputHandler, setFormData] = useForm({
     email: {
@@ -35,6 +39,7 @@ const Authenticate = () => {
     if (isLoginMode) {
     } else {
       try {
+        setIsLoading(true);
         const response = await fetch("http://localhost:5000/api/users/signup", {
           method: "POST",
           headers: {
@@ -48,13 +53,19 @@ const Authenticate = () => {
         });
 
         const responseData = await response.json();
-        console.log(responseData);
+
+        // if you throw it stops execletuing the try and goes to catch
+        if (!response.ok) {
+          throw new Error(responseData.message);
+        }
+
+        setIsLoading(false);
+        auth.login();
       } catch (err) {
-        console.log(err);
+        setIsLoading(false);
+        setError(err.message || "Something went wrong");
       }
     }
-
-    auth.login();
   };
 
   const switchModeHandler = () => {
@@ -78,52 +89,61 @@ const Authenticate = () => {
     setIsLoginMode((prevMode) => !prevMode);
   };
 
+  const errorHandler = () => {
+    setError(null);
+  };
+
   return (
-    <Card className="authentication">
-      <h2>Login Required</h2>
-      <hr />
-      <form onSubmit={authenticateSubmitHandler}>
-        {!isLoginMode && (
+    <React.Fragment>
+      <ErrorModal error={error} onClear={errorHandler} />
+      <Card className="authentication">
+        {isLoading && <LoadingSpinner asOverlay />}
+        <h2>Login Required</h2>
+        <hr />
+        <form onSubmit={authenticateSubmitHandler}>
+          {!isLoginMode && (
+            <Input
+              element="input"
+              id="name"
+              type="text"
+              label="Name"
+              validators={[VALIDATOR_REQUIRE()]}
+              errorText="Please enter a name"
+              onInput={inputHandler}
+            />
+          )}
           <Input
+            id="email"
             element="input"
-            id="name"
-            type="text"
-            label="Name"
-            validators={[VALIDATOR_REQUIRE()]}
-            errorText="Please enter a name"
+            type="email"
+            label="Email"
+            validators={[VALIDATOR_EMAIL()]}
+            errorText="Please enter a valid email."
             onInput={inputHandler}
+            initialValue={formState.inputs.email.value}
+            initialValid={formState.inputs.email.isValid}
           />
-        )}
-        <Input
-          id="email"
-          element="input"
-          type="email"
-          label="Email"
-          validators={[VALIDATOR_EMAIL()]}
-          errorText="Please enter a valid email."
-          onInput={inputHandler}
-          initialValue={formState.inputs.email.value}
-          initialValid={formState.inputs.email.isValid}
-        />
-        <Input
-          id="password"
-          element="input"
-          type="password"
-          label="Password"
-          validators={[VALIDATOR_MIN(5)]}
-          errorText="Please enter a valid password, atleast 5 characters"
-          onInput={inputHandler}
-          initialValue={formState.inputs.password.value}
-          initialValid={formState.inputs.password.isValid}
-        />
-        <Button type="submit" disabled={!formState.isValid}>
-          {isLoginMode ? "LOGIN" : "SIGNUP"}
+          <Input
+            id="password"
+            element="input"
+            type="password"
+            label="Password"
+            validators={[VALIDATOR_MIN(5)]}
+            errorText="Please enter a valid password, atleast 5 characters"
+            onInput={inputHandler}
+            initialValue={formState.inputs.password.value}
+            initialValid={formState.inputs.password.isValid}
+          />
+          <Button type="submit" disabled={!formState.isValid}>
+            {isLoginMode ? "LOGIN" : "SIGNUP"}
+          </Button>
+        </form>
+        <Button inverse onClick={switchModeHandler}>
+          {isLoginMode ? "SWITCH TO SIGNUP" : "SWITCH TO LOGIN"}
         </Button>
-      </form>
-      <Button inverse onClick={switchModeHandler}>
-        {isLoginMode ? "SWITCH TO SIGNUP" : "SWITCH TO LOGIN"}
-      </Button>
-    </Card>
+      </Card>
+      /
+    </React.Fragment>
   );
 };
 
