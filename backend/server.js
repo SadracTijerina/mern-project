@@ -11,6 +11,25 @@ const app = express();
 
 app.use(bodyParser.json());
 
+// This middleware fixes CORS errors, you put this before all your routes so
+// that it works on every route
+app.use((req, res, next) => {
+  // The second parameter is which domains should have access and * signifies
+  // every domain
+  res.setHeader("Access-Control-Allow-Origin", "*");
+
+  // This specifies which headers the request sent by the browsers may have
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+
+  // This controls which HTTP methods may be used on the front end
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
+
+  next();
+});
+
 app.use("/api/places", placesRoutes);
 app.use("/api/users", userRoutes);
 
@@ -30,7 +49,7 @@ app.use((error, req, res, next) => {
 
 mongoose
   .connect(
-    "mongodb+srv://reavity:VJF1dka.xrf.xbn2vud@udemymern.toh7o.mongodb.net/places?retryWrites=true&w=majority"
+    "mongodb+srv://reavity:VJF1dka.xrf.xbn2vud@udemymern.toh7o.mongodb.net/mernProject?retryWrites=true&w=majority"
   )
   .then(() => {
     app.listen(5000);
