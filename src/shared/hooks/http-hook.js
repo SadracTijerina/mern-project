@@ -10,18 +10,22 @@ export const useHttpClient = () => {
     async (url, method = "GET", body = null, headers = {}) => {
       setIsLoading(true);
 
-      const httpAbortCtrll = new AbortController();
-      activeHttpRequest.current.push(httpAbortCtrll);
+      const httpAbortCtrl = new AbortController();
+      activeHttpRequest.current.push(httpAbortCtrl);
 
       try {
         const response = await fetch(url, {
           method,
           body,
           headers,
-          signal: httpAbortCtrll.signal,
+          signal: httpAbortCtrl.signal,
         });
 
         const responseData = await response.json();
+
+        activeHttpRequest.current = activeHttpRequest.current.filter(
+          (reqCtrl) => reqCtrl !== httpAbortCtrl
+        );
 
         if (!response.ok) {
           throw new Error(responseData.message);

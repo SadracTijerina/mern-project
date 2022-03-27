@@ -65,18 +65,8 @@ const Authenticate = () => {
             "Content-Type": "application/json",
           }
         );
-
-        const responseData = await response.json();
-
-        // if you throw it stops execletuing the try and goes to catch
-        if (!response.ok) {
-          throw new Error(responseData.message);
-        }
-
         auth.login();
-      } catch (err) {
-        setError(err.message || "Something went wrong");
-      }
+      } catch (err) {}
     }
   };
 
@@ -101,13 +91,9 @@ const Authenticate = () => {
     setIsLoginMode((prevMode) => !prevMode);
   };
 
-  const errorHandler = () => {
-    setError(null);
-  };
-
   return (
     <React.Fragment>
-      <ErrorModal error={error} onClear={errorHandler} />
+      <ErrorModal error={error} onClear={clearError} />
       <Card className="authentication">
         {isLoading && <LoadingSpinner asOverlay />}
         <h2>Login Required</h2>
