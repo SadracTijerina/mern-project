@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -12,6 +13,9 @@ const HttpError = require("./models/http-error");
 const app = express();
 
 app.use(bodyParser.json());
+
+// files in this folder if requested are returned so this allows us to show images on our webpage
+app.use("/uploads/images", express.static(path.join("uploads", "images")));
 
 // This middleware fixes CORS errors, you put this before all your routes so
 // that it works on every route
