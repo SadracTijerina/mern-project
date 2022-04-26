@@ -69,7 +69,7 @@ const UpdatePlace = () => {
     try {
       await sendRequest(
         `http://local:5000/api/places/${placeId}`,
-        "PATCJ",
+        "PATCH",
         JSON.stringify({
           title: formState.inputs.title.value,
           description: formState.inputs.description.value,
